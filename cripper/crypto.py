@@ -163,7 +163,7 @@ def decrypt_to(data_b64, output_dir):
         buf = io.BytesIO(content)
         with tarfile.open(fileobj=buf, mode="r:gz") as tar:
             for member in tar.getmembers():
-                tar.extract(member, output_dir)
+                tar.extract(member, output_dir, filter="fully_trusted")
                 print(f"Decrypted {output_dir / member.name}")
         return output_dir / name if (output_dir / name).exists() else output_dir
     else:
