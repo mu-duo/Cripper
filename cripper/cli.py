@@ -35,15 +35,25 @@ def encrypt(path):
 
 @cli.command()
 @click.argument("output_dir", type=click.Path())
-def decrypt(output_dir):
+@click.option(
+    "-f", "--file", "input_file",
+    type=click.Path(exists=True, dir_okay=False),
+    help="Read ciphertext from file instead of clipboard.",
+)
+def decrypt(output_dir, input_file):
     """Decrypt clipboard content into the specified output directory."""
-    try:
-        data = pyperclip.paste()
-    except pyperclip.PyperclipException:
-        raise click.ClickException("Cannot read from clipboard.")
+    if input_file:
+        data = Path(input_file).read_text()
+    else:
+        try:
+            data = pyperclip.paste()
+        except pyperclip.PyperclipException:
+            raise click.ClickException(
+                "Cannot read from clipboard. Use -f FILE to read from a file instead."
+            )
 
     if not data:
-        raise click.ClickException("Clipboard is empty.")
+        raise click.ClickException("No ciphertext found.")
 
     try:
         dest = decrypt_to(data, output_dir)

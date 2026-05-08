@@ -10,6 +10,7 @@ python -m cripper                  # fallback
 ## Commands
 - `cripper encrypt <path>` — file or directory to clipboard (ciphertext)
 - `cripper decrypt <output-dir>` — clipboard → restored files
+- `cripper decrypt -f <file> <output-dir>` — ciphertext file → restored files
 
 ## Architecture
 - `cripper/cli.py` — Click commands (`encrypt`, `decrypt`)
