@@ -157,11 +157,14 @@ def decrypt_to(data_b64, output_dir):
         output_path = output_dir / name
         with open(output_path, "wb") as fh:
             fh.write(content)
+        print(f"Decrypted {output_path}")
         return output_path
     elif type_byte == 1:  # directory
         buf = io.BytesIO(content)
         with tarfile.open(fileobj=buf, mode="r:gz") as tar:
-            tar.extractall(output_dir)
+            for member in tar.getmembers():
+                tar.extract(member, output_dir)
+                print(f"Decrypted {output_dir / member.name}")
         return output_dir / name if (output_dir / name).exists() else output_dir
     else:
         raise ValueError(f"Unknown payload type: {type_byte}")
