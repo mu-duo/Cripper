@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cripper"
+version = "0.1.0"
+description = "Clipboard-based file & directory encryption tool"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.8"
+authors = [
+    { name = "Cripper contributors" },
+]
+dependencies = [
+    "click>=8.0",
+    "cryptography>=3.0",
+    "pyperclip>=1.8",
+]
+
+[project.scripts]
+cripper = "cripper.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["cripper*"]
