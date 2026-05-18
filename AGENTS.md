@@ -1,5 +1,9 @@
 # AGENTS.md
 
+## 交互要求
+- 思考过程用中文表述
+- 回答也要用中文回复
+
 ## Install & Run
 ```bash
 pip install -e .
