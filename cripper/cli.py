@@ -7,15 +7,7 @@ from cripper.config import DEFAULT_ENCRYPTION_FILE
 from .crypto import encrypt_path, decrypt_to
 
 
-@click.group()
-def cli():
-    """Cripper — clipboard-based file encryption/decryption tool."""
-
-
-@cli.command()
-@click.argument("path", type=click.Path(exists=True))
-def encrypt(path):
-    """Encrypt a file or directory and copy ciphertext to clipboard."""
+def _encrypt_impl(path):
     try:
         result = encrypt_path(path)
     except Exception as e:
@@ -33,15 +25,7 @@ def encrypt(path):
         click.echo(f"Encrypted {label} '{p.name}' and saved to {DEFAULT_ENCRYPTION_FILE}.")
 
 
-@cli.command()
-@click.argument("output_dir", type=click.Path())
-@click.option(
-    "-f", "--file", "input_file",
-    type=click.Path(exists=True, dir_okay=False),
-    help="Read ciphertext from file instead of clipboard.",
-)
-def decrypt(output_dir, input_file):
-    """Decrypt clipboard content into the specified output directory."""
+def _decrypt_impl(output_dir, input_file):
     if input_file:
         data = Path(input_file).read_text()
     else:
@@ -63,5 +47,56 @@ def decrypt(output_dir, input_file):
     click.echo(f"Decrypted to: {dest}")
 
 
+@click.group()
+def cli():
+    """Cripper — clipboard-based file encryption/decryption tool."""
+
+
+@cli.command()
+@click.argument("path", type=click.Path(exists=True))
+def encrypt(path):
+    """Encrypt a file or directory and copy ciphertext to clipboard."""
+    _encrypt_impl(path)
+
+
+@cli.command()
+@click.argument("output_dir", type=click.Path())
+@click.option(
+    "-f", "--file", "input_file",
+    type=click.Path(exists=True, dir_okay=False),
+    help="Read ciphertext from file instead of clipboard.",
+)
+def decrypt(output_dir, input_file):
+    """Decrypt clipboard content into the specified output directory."""
+    _decrypt_impl(output_dir, input_file)
+
+
+@click.command()
+@click.argument("path", type=click.Path(exists=True))
+def encripper(path):
+    """Encrypt a file or directory and copy ciphertext to clipboard."""
+    _encrypt_impl(path)
+
+
+@click.command()
+@click.argument("output_dir", type=click.Path())
+@click.option(
+    "-f", "--file", "input_file",
+    type=click.Path(exists=True, dir_okay=False),
+    help="Read ciphertext from file instead of clipboard.",
+)
+def decripper(output_dir, input_file):
+    """Decrypt clipboard content into the specified output directory."""
+    _decrypt_impl(output_dir, input_file)
+
+
 def main():
     cli()
+
+
+def main_encripper():
+    encripper()
+
+
+def main_decripper():
+    decripper()
