@@ -81,7 +81,7 @@ def is_entry_ignored(entry, all_patterns, basepath):
     return False
 
 
-def _walk_and_add(tar, dirpath, basepath, inherited_patterns=None):
+def walk_and_add(tar, dirpath, basepath, inherited_patterns=None):
     """Recursively add files to tar, respecting .cripperignore rules."""
     if inherited_patterns is None:
         inherited_patterns = []
@@ -102,7 +102,7 @@ def _walk_and_add(tar, dirpath, basepath, inherited_patterns=None):
             continue
 
         if entry.is_dir():
-            _walk_and_add(tar, entry, basepath, all_patterns)
+            walk_and_add(tar, entry, basepath, all_patterns)
         elif entry.is_file():
             arcname = entry.relative_to(basepath).as_posix()
             tar.add(entry, arcname=arcname)
@@ -114,7 +114,7 @@ def build_dir_payload(dirpath):
     buf = io.BytesIO()
 
     with tarfile.open(fileobj=buf, mode="w:gz") as tar:
-        _walk_and_add(tar, path, path)
+        walk_and_add(tar, path, path)
 
     tar_bytes = buf.getvalue()
 
