@@ -21,7 +21,8 @@ dependencies = [
 [project.scripts]
 cripper = "cripper.cli:main"
 encripper  = "cripper.cli:main_encripper"
-decripper  = "cripper.cli:main_decripper"
+decripper   = "cripper.cli:main_decripper"
+engitcrypt  = "cripper.engitcrypt:main_engitcrypt"
 
 [tool.setuptools.packages.find]
 include = ["cripper*"]

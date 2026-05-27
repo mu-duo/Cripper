@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find \"test/fixture\" -name \".cripperignore\" -type f)",
+      "Bash(cat \"test/fixture/.cripperignore\")",
+      "Bash(cat \"test/fixture/src/.cripperignore\")",
+      "Bash(echo \"---exit=$?\")",
+      "Bash(pip install *)",
+      "Bash(Select-Object -Last 5)",
+      "PowerShell(pip install *)",
+      "PowerShell(engitcrypt *)",
+      "PowerShell(degitcrypt *)",
+      "PowerShell(New-Item *)",
+      "PowerShell(Join-Path *)",
+      "PowerShell(Remove-Item *)"
+    ]
+  }
+}
