@@ -14,7 +14,7 @@ def _get_fernet():
     return Fernet(key.encode() if isinstance(key, str) else key)
 
 
-def _build_file_payload(filepath):
+def build_file_payload(filepath):
     path = Path(filepath)
     with open(path, "rb") as fh:
         content = fh.read()
@@ -29,7 +29,7 @@ def _build_file_payload(filepath):
     return payload
 
 
-def _read_ignore_patterns(dirpath):
+def read_ignore_patterns(dirpath):
     """Load patterns from IGNORE_FILE in dirpath if it exists."""
     ignore_file = dirpath / IGNORE_FILE
     patterns = []
@@ -42,7 +42,7 @@ def _read_ignore_patterns(dirpath):
     return patterns
 
 
-def _matches_pattern(rel_path, pattern):
+def matches_pattern(rel_path, pattern):
     """Check if a relative path matches an ignore pattern."""
     rel = rel_path.replace("\\", "/")
     p = pattern.replace("\\", "/")
@@ -66,7 +66,7 @@ def _matches_pattern(rel_path, pattern):
     return False
 
 
-def _is_entry_ignored(entry, all_patterns, basepath):
+def is_entry_ignored(entry, all_patterns, basepath):
     """Check whether entry should be excluded by any inherited pattern."""
     if entry.name == IGNORE_FILE:
         return True
@@ -76,7 +76,7 @@ def _is_entry_ignored(entry, all_patterns, basepath):
             rel = str(entry.relative_to(pattern_base))
         except ValueError:
             continue
-        if _matches_pattern(rel, pattern):
+        if matches_pattern(rel, pattern):
             return True
     return False
 
@@ -86,7 +86,7 @@ def _walk_and_add(tar, dirpath, basepath, inherited_patterns=None):
     if inherited_patterns is None:
         inherited_patterns = []
 
-    local = [(dirpath, p) for p in _read_ignore_patterns(dirpath)]
+    local = [(dirpath, p) for p in read_ignore_patterns(dirpath)]
     all_patterns = inherited_patterns + local
 
     try:
@@ -98,7 +98,7 @@ def _walk_and_add(tar, dirpath, basepath, inherited_patterns=None):
         if entry.is_symlink():
             continue
 
-        if _is_entry_ignored(entry, all_patterns, basepath):
+        if is_entry_ignored(entry, all_patterns, basepath):
             continue
 
         if entry.is_dir():
@@ -109,7 +109,7 @@ def _walk_and_add(tar, dirpath, basepath, inherited_patterns=None):
             print(f"Encrypted {entry}")
 
 
-def _build_dir_payload(dirpath):
+def build_dir_payload(dirpath):
     path = Path(dirpath)
     buf = io.BytesIO()
 
@@ -129,9 +129,9 @@ def _build_dir_payload(dirpath):
 def encrypt_path(path):
     p = Path(path)
     if p.is_file():
-        payload = _build_file_payload(p)
+        payload = build_file_payload(p)
     elif p.is_dir():
-        payload = _build_dir_payload(p)
+        payload = build_dir_payload(p)
     else:
         raise ValueError(f"{path} is neither a file nor a directory")
 
