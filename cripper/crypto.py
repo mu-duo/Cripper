@@ -9,7 +9,7 @@ from cryptography.fernet import Fernet
 from .config import IGNORE_FILE, get_or_create_key
 
 
-def _get_fernet():
+def get_fernet():
     key = get_or_create_key()
     return Fernet(key.encode() if isinstance(key, str) else key)
 
@@ -135,13 +135,13 @@ def encrypt_path(path):
     else:
         raise ValueError(f"{path} is neither a file nor a directory")
 
-    f = _get_fernet()
+    f = get_fernet()
     encrypted = f.encrypt(payload)
     return base64.b64encode(encrypted).decode("ascii")
 
 
 def decrypt_to(data_b64, output_dir):
-    f = _get_fernet()
+    f = get_fernet()
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
