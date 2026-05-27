@@ -1,6 +1,6 @@
 import base64
-import fnmatch
 import io
+import re
 import tarfile
 from pathlib import Path
 
@@ -29,56 +29,125 @@ def build_file_payload(filepath):
     return payload
 
 
+def _glob_to_regex(pattern):
+    """Convert a gitignore glob pattern to a regex string."""
+    i = 0
+    n = len(pattern)
+    parts = []
+
+    while i < n:
+        if pattern[i : i + 2] == "**":
+            if i + 3 <= n and pattern[i + 2] == "/":
+                # **/ — match zero or more directories
+                if i == 0:
+                    parts.append(r"(?:.*/)?")
+                else:
+                    # The preceding / was already appended as a literal; pop it
+                    if parts and parts[-1] == "/":
+                        parts.pop()
+                    parts.append(r"/(?:.*/)?")
+                i += 3
+            elif i + 2 == n:
+                # trailing ** — match everything inside
+                if parts and parts[-1] == "/":
+                    parts.pop()
+                parts.append(r"(?:/.*)?")
+                i += 2
+            else:
+                parts.append(r".*")
+                i += 2
+        elif pattern[i] == "*":
+            parts.append(r"[^/]*")
+            i += 1
+        elif pattern[i] == "?":
+            parts.append(r"[^/]")
+            i += 1
+        elif pattern[i] == "[":
+            parts.append("[")
+            i += 1
+        elif pattern[i] == "]":
+            parts.append("]")
+            i += 1
+        elif pattern[i] in r".^${}()|+\\":
+            parts.append("\\" + pattern[i])
+            i += 1
+        else:
+            parts.append(pattern[i])
+            i += 1
+
+    return "".join(parts)
+
+
 def read_ignore_patterns(dirpath):
-    """Load patterns from IGNORE_FILE in dirpath if it exists."""
+    """Load patterns from IGNORE_FILE in dirpath if it exists.
+
+    Returns a list of (negate, pattern) tuples.
+    """
     ignore_file = dirpath / IGNORE_FILE
     patterns = []
     if ignore_file.is_file():
         with open(ignore_file, "r", encoding="utf-8") as f:
             for line in f:
-                line = line.strip()
-                if line and not line.startswith("#"):
-                    patterns.append(line)
+                line = line.rstrip("\n").rstrip(" ")
+                if not line or line.startswith("#"):
+                    continue
+                negate = False
+                if line.startswith("!"):
+                    negate = True
+                    line = line[1:]
+                patterns.append((negate, line))
     return patterns
 
 
 def matches_pattern(rel_path, pattern):
-    """Check if a relative path matches an ignore pattern."""
+    """Check if a relative path matches a gitignore-style pattern."""
     rel = rel_path.replace("\\", "/")
-    p = pattern.replace("\\", "/")
 
-    if fnmatch.fnmatch(rel, p):
-        return True
+    # Trailing / means match directories only (caller checks via need_ignore)
+    if pattern.endswith("/"):
+        pattern = pattern.rstrip("/")
 
-    # Directory pattern (ends with /) — match dir and its contents
-    if p.endswith("/"):
-        p_dir = p[:-1]
-        if rel == p_dir or rel.startswith(p_dir + "/"):
-            return True
-        if fnmatch.fnmatch(rel, p_dir):
-            return True
+    # Leading / anchors to the directory containing .cripperignore.
+    # Once anchored, the pattern must match the full relative path.
+    anchored = pattern.startswith("/")
+    if anchored:
+        pattern = pattern[1:]
 
-    # Match filename alone (handles patterns without slash like *.pyc)
-    if "/" not in p:
-        if fnmatch.fnmatch(Path(rel).name, p):
-            return True
+    has_slash = "/" in pattern
 
-    return False
+    if not has_slash and not anchored:
+        match_against = Path(rel).name
+    else:
+        match_against = rel
+
+    regex = "^" + _glob_to_regex(pattern) + "$"
+    return bool(re.match(regex, match_against))
 
 
 def need_ignore(entry, all_patterns, basepath):
-    """Check whether entry should be excluded by any inherited pattern."""
+    """Check whether entry should be excluded by gitignore-style patterns.
+
+    The last matching pattern wins; a negated pattern (!) re-includes the file.
+    """
     if entry.name == IGNORE_FILE:
         return True
 
-    for pattern_base, pattern in all_patterns:
+    result = False
+    is_dir = entry.is_dir()
+
+    for pattern_base, negate, pattern in all_patterns:
         try:
             rel = str(entry.relative_to(pattern_base))
         except ValueError:
             continue
+
+        if pattern.endswith("/") and not is_dir:
+            continue
+
         if matches_pattern(rel, pattern):
-            return True
-    return False
+            result = not negate
+
+    return result
 
 
 def walk_and_add(tar, dirpath, basepath, inherited_patterns=None):
@@ -86,7 +155,7 @@ def walk_and_add(tar, dirpath, basepath, inherited_patterns=None):
     if inherited_patterns is None:
         inherited_patterns = []
 
-    local = [(dirpath, p) for p in read_ignore_patterns(dirpath)]
+    local = [(dirpath, negate, p) for negate, p in read_ignore_patterns(dirpath)]
     all_patterns = inherited_patterns + local
 
     try:
