@@ -66,7 +66,7 @@ def matches_pattern(rel_path, pattern):
     return False
 
 
-def is_entry_ignored(entry, all_patterns, basepath):
+def need_ignore(entry, all_patterns, basepath):
     """Check whether entry should be excluded by any inherited pattern."""
     if entry.name == IGNORE_FILE:
         return True
@@ -98,7 +98,7 @@ def walk_and_add(tar, dirpath, basepath, inherited_patterns=None):
         if entry.is_symlink():
             continue
 
-        if is_entry_ignored(entry, all_patterns, basepath):
+        if need_ignore(entry, all_patterns, basepath):
             continue
 
         if entry.is_dir():
