@@ -6,9 +6,21 @@ Install
 
 .. code-block:: bash
 
-   pip install -e .
+   pip install cripper
 
 Requirements: Python >= 3.8, ``click``, ``cryptography``, ``pyperclip``.
+
+Build Documentation
+-------------------
+
+.. code-block:: bash
+
+   pip install -e ".[doc]"
+   cd doc
+   make html      # Linux/macOS
+   make.bat html  # Windows
+
+The HTML output is in ``doc/build/html/``.
 
 Commands
 --------
@@ -18,7 +30,7 @@ Commands
 
 .. code-block:: bash
 
-   cripper encrypt <path>        # file or directory → clipboard (Base64 ciphertext)
+   cripper encrypt <path>         # file or directory → clipboard (Base64 ciphertext)
    cripper decrypt <output-dir>   # clipboard → restored files
 
 ``encripper`` / ``decripper``

@@ -1,7 +1,7 @@
 Cripper documentation
 =====================
 
-Clipboard-based file & directory encryption tool. Encrypt/decrypt files and directories via the system clipboard with AES-128-CBC (Fernet).
+Clipboard-based file & directory encryption tool — encrypt/decrypt via system clipboard with AES-128-CBC (Fernet).
 
 .. toctree::
    :maxdepth: 2

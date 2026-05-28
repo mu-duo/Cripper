@@ -1,0 +1,12 @@
+{%- extends "!layout.html" -%}
+
+{%- block document -%}
+<div class="lang-switcher" style="text-align: right; padding: 0.3em 1em 0 0; font-size: 0.9em;">
+  {%- if pagename.endswith('_zh') -%}
+    <a href="{{ pagename[:-3] }}.html">EN</a> | <strong>&#20013;&#25991;</strong>
+  {%- else -%}
+    <strong>EN</strong> | <a href="{{ pagename }}_zh.html">&#20013;&#25991;</a>
+  {%- endif -%}
+</div>
+{{ super() }}
+{%- endblock -%}
