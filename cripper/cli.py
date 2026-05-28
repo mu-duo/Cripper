@@ -5,8 +5,7 @@ from pathlib import Path
 from cripper.config import DEFAULT_ENCRYPTION_FILE
 
 from .crypto import encrypt_path, decrypt_to
-from .util import calc_size
-
+from .util import *
 
 def _encrypt_impl(path):
     try:
@@ -19,11 +18,11 @@ def _encrypt_impl(path):
 
     try:
         pyperclip.copy(result)
-        click.echo(f"Encrypted {label} '{p.name}'({calc_size(result)}).")
+        click.echo(green(f"Encrypted {label} '{p.name}'({calc_size(result)})."))
     except pyperclip.PyperclipException:
         with open(DEFAULT_ENCRYPTION_FILE, "w") as fh:
             fh.write(result)
-        click.echo(f"Encrypted {label} '{p.name}'({calc_size(result)}) and saved to {DEFAULT_ENCRYPTION_FILE}.")
+        click.echo(green(f"Encrypted {label} '{p.name}'({calc_size(result)}) and saved to {DEFAULT_ENCRYPTION_FILE}."))
 
 
 def _decrypt_impl(output_dir, input_file):
@@ -45,7 +44,7 @@ def _decrypt_impl(output_dir, input_file):
     except Exception as e:
         raise click.ClickException(f"Decryption failed: {e}")
 
-    click.echo(f"Decrypted to: {dest}")
+    click.echo(green(f"Decrypted to: {dest}"))
 
 
 @click.group()

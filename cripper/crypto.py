@@ -7,6 +7,7 @@ from pathlib import Path
 from cryptography.fernet import Fernet
 
 from .config import IGNORE_FILE, get_or_create_key
+from .util import info, trace
 
 
 def get_fernet():
@@ -25,7 +26,7 @@ def build_file_payload(filepath):
     payload += name_bytes
     payload += content
 
-    print(f"Encrypted {path}")
+    info(f"Encrypted {path}")
     return payload
 
 
@@ -175,7 +176,7 @@ def walk_and_add(tar, dirpath, basepath, inherited_patterns=None):
         elif entry.is_file():
             arcname = entry.relative_to(basepath).as_posix()
             tar.add(entry, arcname=arcname)
-            print(f"Encrypted {entry}")
+            trace(f"Encrypted {entry}")
 
 
 def build_dir_payload(dirpath):
@@ -226,14 +227,14 @@ def decrypt_to(data_b64, output_dir):
         output_path = output_dir / name
         with open(output_path, "wb") as fh:
             fh.write(content)
-        print(f"Decrypted {output_path}")
+        info(f"Decrypted {output_path}")
         return output_path
     elif type_byte == 1:  # directory
         buf = io.BytesIO(content)
         with tarfile.open(fileobj=buf, mode="r:gz") as tar:
             for member in tar.getmembers():
                 tar.extract(member, output_dir, filter="fully_trusted")
-                print(f"Decrypted {output_dir / member.name}")
+                info(f"Decrypted {output_dir / member.name}")
         return output_dir / name if (output_dir / name).exists() else output_dir
     else:
         raise ValueError(f"Unknown payload type: {type_byte}")
