@@ -8,6 +8,7 @@ import pyperclip
 
 from .config import DEFAULT_ENCRYPTION_FILE
 from .crypto import encrypt_path
+from .util import calc_size
 
 
 def _get_changed_files():
@@ -83,10 +84,12 @@ def _encrypt_files(files):
         pyperclip.copy(result)
         label = "file" if len(existing) == 1 else "files"
         click.echo(f"Encrypted {len(existing)} {label} → clipboard.")
+        click.echo(f"content size: {calc_size(result)}")
     except pyperclip.PyperclipException:
         out = Path(DEFAULT_ENCRYPTION_FILE)
         out.write_text(result, encoding="ascii")
         click.echo(f"Encrypted {len(existing)} file(s) → {out}")
+        click.echo(f"content size: {calc_size(result)}")
 
 
 @click.command()
