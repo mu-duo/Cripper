@@ -65,7 +65,9 @@
       "PowerShell(echo *)",
       "PowerShell(find *)",
       "PowerShell(python *)",
-      "PowerShell(pytest*)"
+      "PowerShell(pytest*)",
+      "Bash(Get-ChildItem *)",
+      "Bash(../.venv/Scripts/sphinx-build -b html source build/html)"
     ],
     "ask": [
       "Bash(pip *)",
