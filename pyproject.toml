@@ -18,6 +18,12 @@ dependencies = [
     "pyperclip>=1.8",
 ]
 
+[project.optional-dependencies]
+doc = [
+    "sphinx>=9.0",
+    "sphinx-rtd-theme>=3.0",
+]
+
 [project.scripts]
 cripper = "cripper.cli:main"
 encripper  = "cripper.cli:main_encripper"
