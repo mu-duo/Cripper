@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cripper"
-version = "0.3.0"
+version = "0.3.1"
 description = "Clipboard-based file & directory encryption tool"
 readme = "README.md"
 license = { text = "Apache-2.0" }
@@ -15,6 +15,7 @@ authors = [
 dependencies = [
     "click>=8.0",
     "cryptography>=3.0",
+    "py-walk>=0.3.0",
     "pyperclip>=1.8",
 ]
 
@@ -22,6 +23,10 @@ dependencies = [
 doc = [
     "sphinx>=9.0",
     "sphinx-rtd-theme>=3.0",
+]
+dev = [
+    "cripper[doc]",
+    "pytest>=9.0",
 ]
 
 [project.scripts]

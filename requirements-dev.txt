@@ -1,0 +1,5 @@
+-r requirements.txt
+
+sphinx>=9.0
+sphinx-rtd-theme>=3.0
+pytest>=9.0
