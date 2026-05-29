@@ -1,10 +1,10 @@
 import base64
 import io
-import re
 import tarfile
 from pathlib import Path
 
 from cryptography.fernet import Fernet
+from py_walk import get_parser_from_file
 
 from .config import IGNORE_FILE, get_or_create_key
 from .util import info, trace
@@ -30,134 +30,41 @@ def build_file_payload(filepath):
     return payload
 
 
-def _glob_to_regex(pattern):
-    """Convert a gitignore glob pattern to a regex string."""
-    i = 0
-    n = len(pattern)
-    parts = []
-
-    while i < n:
-        if pattern[i : i + 2] == "**":
-            if i + 3 <= n and pattern[i + 2] == "/":
-                # **/ — match zero or more directories
-                if i == 0:
-                    parts.append(r"(?:.*/)?")
-                else:
-                    # The preceding / was already appended as a literal; pop it
-                    if parts and parts[-1] == "/":
-                        parts.pop()
-                    parts.append(r"/(?:.*/)?")
-                i += 3
-            elif i + 2 == n:
-                # trailing ** — match everything inside
-                if parts and parts[-1] == "/":
-                    parts.pop()
-                parts.append(r"(?:/.*)?")
-                i += 2
-            else:
-                parts.append(r".*")
-                i += 2
-        elif pattern[i] == "*":
-            parts.append(r"[^/]*")
-            i += 1
-        elif pattern[i] == "?":
-            parts.append(r"[^/]")
-            i += 1
-        elif pattern[i] == "[":
-            parts.append("[")
-            i += 1
-        elif pattern[i] == "]":
-            parts.append("]")
-            i += 1
-        elif pattern[i] in r".^${}()|+\\":
-            parts.append("\\" + pattern[i])
-            i += 1
-        else:
-            parts.append(pattern[i])
-            i += 1
-
-    return "".join(parts)
-
-
 def read_ignore_patterns(dirpath):
-    """Load patterns from IGNORE_FILE in dirpath if it exists.
+    """Load a Parser from IGNORE_FILE in dirpath if it exists.
 
-    Returns a list of (negate, pattern) tuples.
+    Returns a Parser or None.
     """
     ignore_file = dirpath / IGNORE_FILE
-    patterns = []
     if ignore_file.is_file():
-        with open(ignore_file, "r", encoding="utf-8") as f:
-            for line in f:
-                line = line.rstrip("\n").rstrip(" ")
-                if not line or line.startswith("#"):
-                    continue
-                negate = False
-                if line.startswith("!"):
-                    negate = True
-                    line = line[1:]
-                patterns.append((negate, line))
-    return patterns
+        return get_parser_from_file(str(ignore_file))
+    return None
 
 
-def matches_pattern(rel_path, pattern):
-    """Check if a relative path matches a gitignore-style pattern."""
-    rel = rel_path.replace("\\", "/")
-
-    # Trailing / means match directories only (caller checks via need_ignore)
-    if pattern.endswith("/"):
-        pattern = pattern.rstrip("/")
-
-    # Leading / anchors to the directory containing .cripperignore.
-    # Once anchored, the pattern must match the full relative path.
-    anchored = pattern.startswith("/")
-    if anchored:
-        pattern = pattern[1:]
-
-    has_slash = "/" in pattern
-
-    if not has_slash and not anchored:
-        match_against = Path(rel).name
-    else:
-        match_against = rel
-
-    regex = "^" + _glob_to_regex(pattern) + "$"
-    return bool(re.match(regex, match_against))
-
-
-def need_ignore(entry, all_patterns, basepath):
+def is_ignore(entry: Path, parsers):
     """Check whether entry should be excluded by gitignore-style patterns.
 
-    The last matching pattern wins; a negated pattern (!) re-includes the file.
+    Checks the entry against each Parser; returns True if any parser matches.
+    Negations (e.g. ``!important.log``) are handled by py_walk internally.
     """
     if entry.name == IGNORE_FILE:
         return True
 
-    result = False
-    is_dir = entry.is_dir()
+    for parser in parsers:
+        if parser.match(entry):
+            return True
 
-    for pattern_base, negate, pattern in all_patterns:
-        try:
-            rel = str(entry.relative_to(pattern_base))
-        except ValueError:
-            continue
-
-        if pattern.endswith("/") and not is_dir:
-            continue
-
-        if matches_pattern(rel, pattern):
-            result = not negate
-
-    return result
+    return False
 
 
-def walk_and_add(tar, dirpath, basepath, inherited_patterns=None):
+def walk_and_add(tar, dirpath, root, parsers=None):
     """Recursively add files to tar, respecting .cripperignore rules."""
-    if inherited_patterns is None:
-        inherited_patterns = []
+    if parsers is None:
+        parsers = []
 
-    local = [(dirpath, negate, p) for negate, p in read_ignore_patterns(dirpath)]
-    all_patterns = inherited_patterns + local
+    parser = read_ignore_patterns(dirpath)
+    if parser is not None:
+        parsers.append(parser)
 
     try:
         entries = sorted(dirpath.iterdir(), key=lambda p: p.name)
@@ -168,13 +75,14 @@ def walk_and_add(tar, dirpath, basepath, inherited_patterns=None):
         if entry.is_symlink():
             continue
 
-        if need_ignore(entry, all_patterns, basepath):
+        if is_ignore(entry, parsers):
+            trace(f"Skipped {entry} due to ignore rules")
             continue
 
         if entry.is_dir():
-            walk_and_add(tar, entry, basepath, all_patterns)
+            walk_and_add(tar, entry, root, parsers)
         elif entry.is_file():
-            arcname = entry.relative_to(basepath).as_posix()
+            arcname = entry.relative_to(root).as_posix()
             tar.add(entry, arcname=arcname)
             trace(f"Encrypted {entry}")
 
