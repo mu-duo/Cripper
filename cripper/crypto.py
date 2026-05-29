@@ -7,7 +7,7 @@ from cryptography.fernet import Fernet
 from py_walk import get_parser_from_file
 
 from .config import IGNORE_FILE, get_or_create_key
-from .util import info, trace, gray, green
+from .util import info, trace, gray, green, format_file_size
 
 
 def get_fernet():
@@ -26,7 +26,7 @@ def build_file_payload(filepath):
     payload += name_bytes
     payload += content
 
-    info(f"Encrypted {path}")
+    info(f"Encrypted {path} {format_file_size(path)}")
     return payload
 
 
@@ -84,7 +84,7 @@ def walk_and_add(tar, dirpath, root, parsers=None):
         elif entry.is_file():
             arcname = entry.relative_to(root).as_posix()
             tar.add(entry, arcname=arcname)
-            trace(green(f"Encrypted {entry}"))
+            trace(green(f"Encrypted {entry} {format_file_size(entry)}"))
 
 
 def build_dir_payload(dirpath):

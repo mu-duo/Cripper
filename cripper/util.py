@@ -68,3 +68,25 @@ def bold(msg):
 
 def gray(msg):
     return f"{Style.DIM}{msg}{Style.RESET_ALL}"
+
+
+def format_file_size(filepath):
+    """Return a color-coded human-readable file size string."""
+    size = filepath.stat().st_size
+    if size < 1024:
+        text = f"{size} B"
+    elif size < 1024**2:
+        text = f"{size / 1024:.2f} KB"
+    elif size < 1024**3:
+        text = f"{size / 1024**2:.2f} MB"
+    else:
+        text = f"{size / 1024**3:.2f} GB"
+
+    if size < 100_000:
+        color = Fore.BLUE
+    elif size < 1_000_000:
+        color = Fore.YELLOW
+    else:
+        color = Fore.RED
+
+    return f"{color}({text}){Style.RESET_ALL}"
