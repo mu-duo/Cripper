@@ -7,7 +7,7 @@ from cryptography.fernet import Fernet
 from py_walk import get_parser_from_file
 
 from .config import IGNORE_FILE, get_or_create_key
-from .util import info, trace
+from .util import info, trace, gray, green
 
 
 def get_fernet():
@@ -76,7 +76,7 @@ def walk_and_add(tar, dirpath, root, parsers=None):
             continue
 
         if is_ignore(entry, parsers):
-            trace(f"Skipped {entry} due to ignore rules")
+            trace(gray(f"Skipped {entry} due to ignore rules"))
             continue
 
         if entry.is_dir():
@@ -84,7 +84,7 @@ def walk_and_add(tar, dirpath, root, parsers=None):
         elif entry.is_file():
             arcname = entry.relative_to(root).as_posix()
             tar.add(entry, arcname=arcname)
-            trace(f"Encrypted {entry}")
+            trace(green(f"Encrypted {entry}"))
 
 
 def build_dir_payload(dirpath):

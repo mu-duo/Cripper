@@ -1,3 +1,5 @@
+import importlib.metadata
+
 import click
 import pyperclip
 from pathlib import Path
@@ -6,6 +8,15 @@ from cripper.config import DEFAULT_ENCRYPTION_FILE
 
 from .crypto import encrypt_path, decrypt_to
 from .util import *
+
+__version__ = importlib.metadata.version("cripper")
+
+
+def _print_version(ctx, param, value):
+    if not value or ctx.resilient_parsing:
+        return
+    click.echo(f"Cripper, version {__version__}")
+    ctx.exit()
 
 def _encrypt_impl(path):
     try:
@@ -48,6 +59,12 @@ def _decrypt_impl(output_dir, input_file):
 
 
 @click.group()
+@click.option(
+    "-v", "--version", "show_version",
+    is_flag=True, is_eager=True, expose_value=False,
+    callback=_print_version,
+    help="Show the version and exit.",
+)
 def cli():
     """Cripper — clipboard-based file encryption/decryption tool."""
 
@@ -72,6 +89,12 @@ def decrypt(output_dir, input_file):
 
 
 @click.command()
+@click.option(
+    "-v", "--version", "show_version",
+    is_flag=True, is_eager=True, expose_value=False,
+    callback=_print_version,
+    help="Show the version and exit.",
+)
 @click.argument("path", type=click.Path(exists=True))
 def encripper(path):
     """Encrypt a file or directory and copy ciphertext to clipboard."""
@@ -79,6 +102,12 @@ def encripper(path):
 
 
 @click.command()
+@click.option(
+    "-v", "--version", "show_version",
+    is_flag=True, is_eager=True, expose_value=False,
+    callback=_print_version,
+    help="Show the version and exit.",
+)
 @click.argument("output_dir", type=click.Path())
 @click.option(
     "-f", "--file", "input_file",

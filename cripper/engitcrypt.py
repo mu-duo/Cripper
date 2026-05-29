@@ -1,3 +1,4 @@
+import importlib.metadata
 import shutil
 import subprocess
 import tempfile
@@ -9,6 +10,15 @@ import pyperclip
 from .config import DEFAULT_ENCRYPTION_FILE
 from .crypto import encrypt_path
 from .util import calc_size
+
+__version__ = importlib.metadata.version("cripper")
+
+
+def _print_version(ctx, param, value):
+    if not value or ctx.resilient_parsing:
+        return
+    click.echo(f"Cripper, version {__version__}")
+    ctx.exit()
 
 
 def _get_changed_files():
@@ -93,6 +103,12 @@ def _encrypt_files(files):
 
 
 @click.command()
+@click.option(
+    "-v", "--version", "show_version",
+    is_flag=True, is_eager=True, expose_value=False,
+    callback=_print_version,
+    help="Show the version and exit.",
+)
 @click.option(
     "-c", "--commit",
     default=None,
