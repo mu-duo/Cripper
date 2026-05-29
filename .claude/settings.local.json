@@ -67,9 +67,18 @@
       "PowerShell(python *)",
       "PowerShell(pytest*)",
       "Bash(Get-ChildItem *)",
-      "Bash(../.venv/Scripts/sphinx-build -b html source build/html)"
+      "Bash(.venv/Scripts/python -m *)",
+      "Bash(../.venv/Scripts/sphinx-build -b html source build/html)",
+      "Bash(.venv/Scripts/python -c \"import py_walk; print\\(dir\\(py_walk\\)\\)\")",
+      "Bash(.venv/Scripts/pip show *)",
+      "Bash(.venv/Scripts/python -c \"from py_walk import walk, get_parser_from_file, get_parser_from_list; print\\('--- walk ---'\\); help\\(walk\\)\")",
+      "Bash(.venv/Scripts/python -c \"from py_walk import get_parser_from_file; help\\(get_parser_from_file\\)\")",
+      "Bash(.venv/Scripts/python -c \"from py_walk import get_parser_from_list; help\\(get_parser_from_list\\)\")",
+      "Bash(.venv/Scripts/python -c \"from py_walk.models import Parser; help\\(Parser\\)\")",
+      "Bash(.venv/Scripts/python -c \"from py_walk.models import parser; print\\(dir\\(parser\\)\\)\")"
     ],
     "ask": [
+      "Bash(.venv/Scripts/pip install *)",
       "Bash(pip *)",
       "Bash(pip3 *)",
       "Bash(python -m pip *)",
