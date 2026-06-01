@@ -10,7 +10,7 @@ readme = "README.md"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.8"
 authors = [
-    { name = "Cripper contributors" },
+    { name = "tanlinfeng", email = "linfeng.tan@foxmail.com" },
 ]
 dependencies = [
     "click>=8.0",
