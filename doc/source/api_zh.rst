@@ -22,3 +22,8 @@ API 参考
    :members:
    :undoc-members:
    :no-index:
+
+.. automodule:: cripper.util
+   :members:
+   :undoc-members:
+   :no-index:

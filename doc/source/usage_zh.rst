@@ -33,6 +33,8 @@ HTML 输出位于 ``doc/build/html/``。
    cripper encrypt <path>         # 加密文件/目录 → 剪贴板（Base64 密文）
    cripper decrypt <output-dir>   # 剪贴板 → 还原文件
 
+所有命令均支持 ``-v`` / ``--version`` 输出版本号。
+
 ``encripper`` / ``decripper``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -54,6 +56,10 @@ HTML 输出位于 ``doc/build/html/``。
 
    engitcrypt              # 加密所有变更（已暂存 + 未暂存 + 未跟踪）
    engitcrypt -c <commit>  # 加密指定 commit 中的变更文件
+
+默认模式直接从工作树收集变更文件。
+使用 ``-c <commit>`` 时，工具会暂存当前修改（stash）、检出目标 commit、
+加密变更文件，然后切回原分支并恢复暂存的修改。
 
 单个文件直接加密；多个文件会被打包为保留目录结构的 tar 归档。
 

@@ -16,3 +16,7 @@ API Reference
 .. automodule:: cripper.engitcrypt
    :members:
    :undoc-members:
+
+.. automodule:: cripper.util
+   :members:
+   :undoc-members:

@@ -33,6 +33,8 @@ Commands
    cripper encrypt <path>         # file or directory → clipboard (Base64 ciphertext)
    cripper decrypt <output-dir>   # clipboard → restored files
 
+All commands accept ``-v`` / ``--version`` to print the version and exit.
+
 ``encripper`` / ``decripper``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -54,6 +56,11 @@ Encrypt changed files in a git working tree into a single clipboard payload.
 
    engitcrypt              # encrypt all changed files (staged + unstaged + untracked)
    engitcrypt -c <commit>  # encrypt files changed in a specific commit
+
+In default mode, changed files are collected directly from the working tree.
+With ``-c <commit>``, the tool stashes any dirty state, checks out the target
+commit, encrypts the changed files, restores the original branch, and pops
+the stash.
 
 A single file is encrypted directly; multiple files are packed into a tar archive preserving directory structure.
 
