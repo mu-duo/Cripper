@@ -108,7 +108,7 @@ def encripper(path):
     callback=_print_version,
     help="Show the version and exit.",
 )
-@click.argument("output_dir", type=click.Path())
+@click.argument("output_dir", type=click.Path(), default=".")
 @click.option(
     "-f", "--file", "input_file",
     type=click.Path(exists=True, dir_okay=False),
